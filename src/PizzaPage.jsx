@@ -11,12 +11,14 @@ const API_URL = "https://your-api-gateway-url"
 
 function PizzaPage() {
   const [pizzas, setPizzas] = useState([]);
+  const [toppings, setToppings] = useState([]);
   const [newPizzaName, setNewPizzaName] = useState("");
   const [selectedToppings, setSelectedToppings] = useState([]);
   const [editingPizza, setEditingPizza] = useState(null);
   const [errorMessage, setErrorMessage] = useState("");
   useEffect(() => {
     fetchPizzas();
+    fetchToppings();
   }, []);
 
   // fetch pizzas from DB
@@ -28,6 +30,18 @@ function PizzaPage() {
     } catch (error) {
       console.error("Error fetching pizzas:", error);
       setErrorMessage("Failed to fetch pizzas.");
+    }
+  }
+
+  // Fetch toppings from DB
+  const fetchToppings = async() => {
+    try {
+      const response = await fetch(`${API_URL}/toppings`)
+      const data = await response.json();
+      setToppings(data);
+    } catch (error) {
+      console.error('Error Fetching Toppings:', error)
+      setErrorMessage("Failed to fetch the toppings.")
     }
   }
 
@@ -162,7 +176,7 @@ function PizzaPage() {
               Select Toppings:
             </Heading>
             <Flex wrap="wrap" gap="0.5rem">
-              {["Cheese", "Tomato", "Pepperoni", "Mushrooms", "Olives", "Onions"].map((topping) => (
+              {toppings.map((topping) => (
                 <Button
                   key={topping}
                   variation={selectedToppings.includes(topping) ? "primary" : "secondary"}
