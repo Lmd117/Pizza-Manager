@@ -1,4 +1,7 @@
 import React, { useState } from "react";
+import { API } from 'aws-amplify'
+import { createPizza } from './graphql/mutations';
+import { listPizzas } from './graphql/queries'; // wil have to change these lines when the graph is made
 import { Button, Flex, Input, Table, TableCell, TableHead, TableRow, TableBody, View, Heading, Alert, Badge } from "@aws-amplify/ui-react";
 import "@aws-amplify/ui-react/styles.css";
 
@@ -13,9 +16,17 @@ function PizzaPage() {
   const [selectedToppings, setSelectedToppings] = useState([]);
   const [editingPizza, setEditingPizza] = useState(null);
   const [errorMessage, setErrorMessage] = useState("");
+  useEffect(() => {
+    fetchPizzas();
+  }, []);
 
-  // Add a new pizza
-  const addPizza = () => {
+  const fetchPizzas = async() => {
+    const pizzaData = await API.graphql({ query: listPizzas })
+    setPizzas(pizzaData.data.listPizzas.items)
+  }
+
+  // Add a new pizza TODO: trouble shoot this method specifically b4 adding the rest of the CRUD
+  const addPizza = async() => {
     if (!newPizzaName.trim()) {
       setErrorMessage("Pizza name cannot be empty!");
       return;
@@ -27,6 +38,18 @@ function PizzaPage() {
     if (selectedToppings.length === 0) {
       setErrorMessage("A pizza must have at least one topping!");
       return;
+    }
+
+    try{
+        const input = { name: newPizzaName }
+        await API.graphql({
+            query: createPizza,
+            variables: { input }
+        })
+        fetchPizzas();
+    } catch (err) {
+        console.log('Error creating pizza', err)
+        setErrorMessage('Error creating pizza.')
     }
 
     setPizzas([...pizzas, { name: newPizzaName.trim(), toppings: selectedToppings }]);
@@ -104,7 +127,7 @@ function PizzaPage() {
             placeholder="Enter pizza name"
             value={newPizzaName}
             onChange={(e) => setNewPizzaName(e.target.value)}
-            backgroundColor="white" // Makes input visible
+            backgroundColor="white"
             color="black"
             />
     

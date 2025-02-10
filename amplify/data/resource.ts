@@ -1,26 +1,31 @@
 import { type ClientSchema, a, defineData } from "@aws-amplify/backend";
-import { postConfirmation } from "../auth/post-confirmation/resource";
 
-const schema = a
-  .schema({
-    UserProfile: a
-      .model({
-        email: a.string(),
-        profileOwner: a.string(),
-      })
-      .authorization((allow) => [
-        allow.ownerDefinedIn("profileOwner"),
-      ]),
-  })
-  .authorization((allow) => [allow.resource(postConfirmation)]);
+/**
+ * Define the schema for the Pizza and Toppings tables
+ */
+const schema = a.schema({
+  pizzas: a
+    .model({
+      name: a.string().required(),
+      createdAt: a.string(),
+      toppings: a.hasMany("pizzas", "toppings"), // Store topping IDs
+    }),
+
+  toppings: a
+    .model({
+      name: a.string().required(),
+      pizzas: a.belongsTo("pizzas", "toppings"),
+    }),
+});
+
 export type Schema = ClientSchema<typeof schema>;
 
+/**
+ * Define the data layer with schema and IAM authorization
+ */
 export const data = defineData({
   schema,
   authorizationModes: {
-    defaultAuthorizationMode: "apiKey",
-    apiKeyAuthorizationMode: {
-      expiresInDays: 30,
-    },
+    defaultAuthorizationMode: "iam",
   },
 });
