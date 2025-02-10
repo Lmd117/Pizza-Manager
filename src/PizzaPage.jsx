@@ -1,17 +1,16 @@
-import React, { useState } from "react";
-import { API } from 'aws-amplify'
-import { createPizza } from './graphql/mutations';
-import { listPizzas } from './graphql/queries'; // wil have to change these lines when the graph is made
-import { Button, Flex, Input, Table, TableCell, TableHead, TableRow, TableBody, View, Heading, Alert, Badge } from "@aws-amplify/ui-react";
+import React, { useState, useEffect } from "react"
+import { Button, Flex, 
+        Input, Table, 
+        TableCell, TableHead, 
+        TableRow, TableBody, 
+        View, Heading, 
+        Alert, Badge } from "@aws-amplify/ui-react";
 import "@aws-amplify/ui-react/styles.css";
 
-function PizzaPage() {
-  const [pizzas, setPizzas] = useState([
-    { name: "Margherita", toppings: ["Cheese", "Tomato"] },
-    { name: "Pepperoni", toppings: ["Cheese", "Pepperoni"] },
-  ]);
+const API_URL = "https://your-api-gateway-url"
 
-  const [toppings] = useState(["Cheese", "Tomato", "Pepperoni", "Mushrooms", "Olives", "Onions"]);
+function PizzaPage() {
+  const [pizzas, setPizzas] = useState([]);
   const [newPizzaName, setNewPizzaName] = useState("");
   const [selectedToppings, setSelectedToppings] = useState([]);
   const [editingPizza, setEditingPizza] = useState(null);
@@ -20,12 +19,19 @@ function PizzaPage() {
     fetchPizzas();
   }, []);
 
+  // fetch pizzas from DB
   const fetchPizzas = async() => {
-    const pizzaData = await API.graphql({ query: listPizzas })
-    setPizzas(pizzaData.data.listPizzas.items)
+    try {
+      const response = await fetch(`${API_URL}/pizzas`);
+      const data = await response.json();
+      setPizzas(data);
+    } catch (error) {
+      console.error("Error fetching pizzas:", error);
+      setErrorMessage("Failed to fetch pizzas.");
+    }
   }
 
-  // Add a new pizza TODO: trouble shoot this method specifically b4 adding the rest of the CRUD
+  // Add a new pizza
   const addPizza = async() => {
     if (!newPizzaName.trim()) {
       setErrorMessage("Pizza name cannot be empty!");
@@ -40,29 +46,43 @@ function PizzaPage() {
       return;
     }
 
-    try{
-        const input = { name: newPizzaName }
-        await API.graphql({
-            query: createPizza,
-            variables: { input }
-        })
-        fetchPizzas();
-    } catch (err) {
-        console.log('Error creating pizza', err)
-        setErrorMessage('Error creating pizza.')
-    }
+    try {
+      const response = await fetch(`${API_URL}/pizzas`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: newPizzaName, toppings: selectedToppings }),
+      });
 
-    setPizzas([...pizzas, { name: newPizzaName.trim(), toppings: selectedToppings }]);
-    resetForm();
+      if (!response.ok) throw new Error("Failed to add pizza");
+      
+      fetchPizzas();
+      resetForm();
+    } catch (error) {
+      console.error("Error creating pizza:", error);
+      setErrorMessage("Error creating pizza.");
+    }
   };
 
   // Delete a pizza
-  const deletePizza = (pizzaName) => {
-    setPizzas(pizzas.filter((pizza) => pizza.name !== pizzaName));
+  const deletePizza = async (pizzaId) => {
+    try {
+      const response = await fetch(`${API_URL}/pizzas`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ pizzaId }),
+      });
+
+      if (!response.ok) throw new Error("Failed to delete pizza");
+      
+      fetchPizzas();
+    } catch (error) {
+      console.error("Error deleting pizza:", error);
+      setErrorMessage("Error deleting pizza.");
+    }
   };
 
   // Update an existing pizza
-  const updatePizza = () => {
+  const updatePizza = async() => {
     if (!newPizzaName.trim()) {
       setErrorMessage("Pizza name cannot be empty!");
       return;
@@ -79,14 +99,21 @@ function PizzaPage() {
       return;
     }
 
-    setPizzas(
-      pizzas.map((pizza) =>
-        pizza.name === editingPizza.name
-          ? { ...pizza, name: newPizzaName.trim(), toppings: selectedToppings }
-          : pizza
-      )
-    );
-    resetForm();
+    try {
+      const response = await fetch(`${API_URL}/pizzas`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ pizzaId: editingPizza.pizzaId, name: newPizzaName, toppings: selectedToppings }),
+      });
+
+      if (!response.ok) throw new Error("Failed to update pizza");
+      
+      fetchPizzas();
+      resetForm();
+    } catch (error) {
+      console.error("Error updating pizza:", error);
+      setErrorMessage("Error updating pizza.");
+    }
   };
 
   // Reset form fields
@@ -106,11 +133,11 @@ function PizzaPage() {
 
     return (
         <View
-        padding="2rem"
-        maxWidth="700px"
-        margin="auto"
-        backgroundColor="darkgray" // Ensures proper contrast
-        borderRadius="10px"
+          padding="2rem"
+          maxWidth="700px"
+          margin="auto"
+          backgroundColor="darkgray" // Ensures proper contrast
+          borderRadius="10px"
         >
         <Heading level={2} margin={"1rem"} textAlign="center" color="white">
             Manage Pizzas 🍕
@@ -124,29 +151,29 @@ function PizzaPage() {
     
         <Flex direction="column" gap="1rem">
             <Input
-            placeholder="Enter pizza name"
-            value={newPizzaName}
-            onChange={(e) => setNewPizzaName(e.target.value)}
-            backgroundColor="white"
-            color="black"
+              placeholder="Enter pizza name"
+              value={newPizzaName}
+              onChange={(e) => setNewPizzaName(e.target.value)}
+              backgroundColor="white"
+              color="black"
             />
     
             <Heading level={5} color="white">
-            Select Toppings:
+              Select Toppings:
             </Heading>
             <Flex wrap="wrap" gap="0.5rem">
-            {toppings.map((topping) => (
+              {["Cheese", "Tomato", "Pepperoni", "Mushrooms", "Olives", "Onions"].map((topping) => (
                 <Button
-                key={topping}
-                variation={selectedToppings.includes(topping) ? "primary" : "secondary"}
-                size="small"
-                backgroundColor={selectedToppings.includes(topping) ? "#ff6600" : "#555"} // Orange for selected, grey for unselected
-                color="white"
-                onClick={() => toggleTopping(topping)}
+                  key={topping}
+                  variation={selectedToppings.includes(topping) ? "primary" : "secondary"}
+                  size="small"
+                  backgroundColor={selectedToppings.includes(topping) ? "#ff6600" : "#555"}
+                  color="white"
+                  onClick={() => toggleTopping(topping)}
                 >
-                {topping}
+                  {topping}
                 </Button>
-            ))}
+              ))}
             </Flex>
     
             {editingPizza ? (
@@ -164,13 +191,13 @@ function PizzaPage() {
             <TableHead>
             <TableRow>
                 <TableCell as="th" backgroundColor="#333" color="white">
-                Pizza Name
+                  Pizza Name
                 </TableCell>
                 <TableCell as="th" backgroundColor="#333" color="white">
-                Toppings
+                  Toppings
                 </TableCell>
                 <TableCell as="th" backgroundColor="#333" color="white">
-                Actions
+                  Actions
                 </TableCell>
             </TableRow>
             </TableHead>
