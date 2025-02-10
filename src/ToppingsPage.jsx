@@ -1,15 +1,33 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Button, Flex, Input, Table, TableCell, TableHead, TableRow, TableBody, View, Heading, Alert } from "@aws-amplify/ui-react";
 import "@aws-amplify/ui-react/styles.css";
 
+const API_URL = "https://your-api-gateway-url";
+
 function ToppingsPage() {
-  const [toppings, setToppings] = useState(["Cheese", "Pepperoni", "Mushrooms"]);
-  const [newTopping, setNewTopping] = useState("");
-  const [editingTopping, setEditingTopping] = useState(null);
-  const [errorMessage, setErrorMessage] = useState("");
+    const [toppings, setToppings] = useState([]);
+    const [newTopping, setNewTopping] = useState("");
+    const [editingTopping, setEditingTopping] = useState(null);
+    const [errorMessage, setErrorMessage] = useState("");
+
+    useEffect(() => {
+        fetchToppings()
+    }, [])
+
+    // fetch toppings from DB
+    const fetchToppings = async () => {
+        try {
+          const response = await fetch(`${API_URL}/toppings`);
+          const data = await response.json();
+          setToppings(data);
+        } catch (error) {
+          console.error("Error fetching toppings:", error);
+          setErrorMessage("Failed to fetch toppings.");
+        }
+      };
 
   // Add a new topping
-  const addTopping = () => {
+  const addTopping = async() => {
     if (!newTopping.trim()) {
       setErrorMessage("Topping name cannot be empty!");
       return;
@@ -18,18 +36,44 @@ function ToppingsPage() {
       setErrorMessage("Duplicate toppings are not allowed!");
       return;
     }
-    setToppings([...toppings, newTopping.trim()]);
-    setNewTopping("");
-    setErrorMessage("");
+    try {
+        const response = await fetch(`${API_URL}/toppings`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name: newTopping }),
+        });
+  
+        if (!response.ok) throw new Error("Failed to add topping");
+  
+        fetchToppings();
+        setNewTopping("");
+        setErrorMessage("");
+      } catch (error) {
+        console.error("Error adding topping:", error);
+        setErrorMessage("Error adding topping.");
+      }
   };
 
   // Delete a topping
-  const deleteTopping = (topping) => {
-    setToppings(toppings.filter((t) => t !== topping));
+  const deleteTopping = async (toppingId) => {
+    try {
+        const response = await fetch(`${API_URL}/toppings`, {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ toppingId }),
+        });
+  
+        if (!response.ok) throw new Error("Failed to delete topping");
+  
+        fetchToppings();
+      } catch (error) {
+        console.error("Error deleting topping:", error);
+        setErrorMessage("Error deleting topping.");
+      }
   };
 
   // Update an existing topping
-  const updateTopping = () => {
+  const updateTopping =async () => {
     if (!newTopping.trim()) {
       setErrorMessage("Topping name cannot be empty!");
       return;
@@ -38,10 +82,23 @@ function ToppingsPage() {
       setErrorMessage("Duplicate toppings are not allowed!");
       return;
     }
-    setToppings(toppings.map((t) => (t === editingTopping ? newTopping.trim() : t)));
-    setEditingTopping(null);
-    setNewTopping("");
-    setErrorMessage("");
+    try {
+        const response = await fetch(`${API_URL}/toppings`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ toppingId: editingTopping.toppingId, name: newTopping }),
+        });
+  
+        if (!response.ok) throw new Error("Failed to update topping");
+  
+        fetchToppings();
+        setEditingTopping(null);
+        setNewTopping("");
+        setErrorMessage("");
+      } catch (error) {
+        console.error("Error updating topping:", error);
+        setErrorMessage("Error updating topping.");
+      }
   };
 
     return (
@@ -94,26 +151,31 @@ function ToppingsPage() {
             </TableHead>
             <TableBody>
                 {toppings.map((topping) => (
-                <TableRow key={topping} backgroundColor="#f9f9f9">
-                    <TableCell>{topping}</TableCell>
+                <TableRow key={topping.toppingId} backgroundColor="#f9f9f9">
+                    <TableCell>{topping.name}</TableCell>
                     <TableCell>
-                    <Flex gap="0.5rem">
-                        <Button
-                        variation="warning"
-                        size="small"
-                        backgroundColor="#ffcc00"
-                        color="black"
-                        onClick={() => {
-                            setEditingTopping(topping);
-                            setNewTopping(topping);
-                        }}
-                        >
-                        Edit
-                        </Button>
-                        <Button variation="destructive" size="small" backgroundColor="#cc0000" color="white" onClick={() => deleteTopping(topping)}>
-                        Delete
-                        </Button>
-                    </Flex>
+                        <Flex gap="0.5rem">
+                            <Button
+                            variation="warning"
+                            size="small"
+                            backgroundColor="#ffcc00"
+                            color="black"
+                            onClick={() => {
+                                setEditingTopping(topping);
+                                setNewTopping(topping.name);
+                            }}
+                            >
+                            Edit
+                            </Button>
+                            <Button 
+                                variation="destructive" 
+                                size="small" 
+                                backgroundColor="#cc0000" 
+                                color="white" 
+                                onClick={() => deleteTopping(topping.toppingId)}>
+                                Delete
+                            </Button>
+                        </Flex>
                     </TableCell>
                 </TableRow>
                 ))}
