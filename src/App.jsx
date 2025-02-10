@@ -1,11 +1,8 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { Route, Routes, Link, BrowserRouter} from "react-router-dom"
 import {
-  Button,
-  Heading,
-  Flex,
   View,
-  Grid,
-  Divider,
+  Heading,
 } from "@aws-amplify/ui-react";
 import { useAuthenticator } from "@aws-amplify/ui-react";
 import { Amplify } from "aws-amplify";
@@ -13,6 +10,11 @@ import "@aws-amplify/ui-react/styles.css";
 import { generateClient } from "aws-amplify/data";
 import outputs from "../amplify_outputs.json";
 import './App.css'
+import PizzaPage from './PizzaPage';
+import ToppingsPage from './ToppingsPage';
+import Header from './Header';
+
+
 
 Amplify.configure(outputs);
 const client = generateClient({
@@ -34,45 +36,77 @@ function App() {
   }
 
   return (
-    <Flex
-      className="App"
-      justifyContent="center"
-      alignItems="center"
-      direction="column"
-      width="70%"
-      margin="0 auto"
-    >
-      <Heading level={1}>My Profile</Heading>
-
-      <Divider />
-
-      <Grid
-        margin="3rem 0"
-        autoFlow="column"
-        justifyContent="center"
-        gap="2rem"
-        alignContent="center"
-      >
-        {userprofiles.map((userprofile) => (
-          <Flex
-            key={userprofile.id || userprofile.email}
-            direction="column"
-            justifyContent="center"
-            alignItems="center"
-            gap="2rem"
-            border="1px solid #ccc"
-            padding="2rem"
-            borderRadius="5%"
-            className="box"
-          >
-            <View>
-              <Heading level="3">{userprofile.email}</Heading>
+    <BrowserRouter>
+      <Header/>
+      <Routes>
+      <Route
+          path="/"
+          element={
+            <View
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                height: "100vh",
+                flexDirection: "column",
+              }}
+            >
+              <Heading level={2} marginBottom="1rem" color={"gray"}>
+                Manage Your Pizzeria 🍕
+              </Heading>
+              
+              <ul
+                style={{
+                  listStyleType: "none",
+                  padding: 0,
+                  display: "flex",
+                  gap: "1rem",
+                }}
+              >
+                <li>
+                  <Link
+                    to="/toppingspage"
+                    style={{
+                      display: "block",
+                      padding: "10px 20px",
+                      backgroundColor: "#0073e6",
+                      color: "white",
+                      borderRadius: "8px",
+                      textDecoration: "none",
+                      textAlign: "center",
+                      fontWeight: "bold",
+                      width: "120px",
+                    }}
+                  >
+                    Toppings
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    to="/pizzapage"
+                    style={{
+                      display: "block",
+                      padding: "10px 20px",
+                      backgroundColor: "#0073e6",
+                      color: "white",
+                      borderRadius: "8px",
+                      textDecoration: "none",
+                      textAlign: "center",
+                      fontWeight: "bold",
+                      width: "120px",
+                    }}
+                  >
+                    Pizza
+                  </Link>
+                </li>
+              </ul>
             </View>
-          </Flex>
-        ))}
-      </Grid>
-      <Button onClick={signOut}>Sign Out</Button>
-    </Flex>
+          }
+        />
+        <Route path="/pizzapage" element={<PizzaPage/>}></Route>
+        <Route path="/toppingspage" element={<ToppingsPage/>}></Route>
+      </Routes>
+    </BrowserRouter>
   );
 }
 
