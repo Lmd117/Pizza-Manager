@@ -22,44 +22,51 @@ function ToppingsPage() {
 
     // fetch toppings from DB
     const fetchToppings = async () => {
-        try {
-          const response = await fetch(`${API_URL}/toppings`, {
-            method: "GET",
-            headers: { "Content-Type": "application/json" },
-          });
+      try {
+        const response = await fetch(`${API_URL}/toppings`, {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+        });
 
-          const data = await response.json();
-          console.log("API Response:", data);
+        const data = await response.json();
+        console.log("API Response:", data);
 
-          if (!Array.isArray(data)) {
-            console.error("API returned invalid data:", data);
-            setToppings([]);
-            return;
-          }
-      
-          setToppings(data);
-        } catch (error) {
-          console.error("Error fetching toppings:", error);
+        if (!data.items || !Array.isArray(data.items)) {
+          console.error("API returned invalid data:", data);
           setToppings([]);
-          setErrorMessage("Failed to fetch toppings.");
+          return;
         }
-      };
+    
+        setToppings(data);
+      } catch (error) {
+        console.error("Error fetching toppings:", error);
+        setToppings([]);
+        setErrorMessage("Failed to fetch toppings.");
+      }
+    };
 
   // Add a new topping
   const addTopping = async() => {
+    print("Received request to add topping:", json.dumps(data, indent=2))
+
     if (!newTopping.trim()) {
       setErrorMessage("Topping name cannot be empty!");
       return;
     }
+
     if (toppings.includes(newTopping.trim())) {
       setErrorMessage("Duplicate toppings are not allowed!");
       return;
     }
+
+    const requestBody = { name: newTopping.trim() };
+    console.log("🔹 Sending POST Request:", requestBody);
+
     try {
         const response = await fetch(`${API_URL}/toppings`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ name: newTopping }),
+          body: JSON.stringify(requestBody),
         });
   
         if (!response.ok) throw new Error("Failed to add topping");
