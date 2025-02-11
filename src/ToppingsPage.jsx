@@ -23,11 +23,24 @@ function ToppingsPage() {
     // fetch toppings from DB
     const fetchToppings = async () => {
         try {
-          const response = await fetch(`${API_URL}/toppings`);
+          const response = await fetch(`${API_URL}/toppings`, {
+            method: "GET",
+            headers: { "Content-Type": "application/json" },
+          });
+
           const data = await response.json();
+          console.log("API Response:", data);
+
+          if (!Array.isArray(data)) {
+            console.error("API returned invalid data:", data);
+            setToppings([]);
+            return;
+          }
+      
           setToppings(data);
         } catch (error) {
           console.error("Error fetching toppings:", error);
+          setToppings([]);
           setErrorMessage("Failed to fetch toppings.");
         }
       };
