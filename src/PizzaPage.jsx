@@ -7,7 +7,7 @@ import { Button, Flex,
         Alert, Badge } from "@aws-amplify/ui-react";
 import "@aws-amplify/ui-react/styles.css";
 
-const API_URL = "https://your-api-gateway-url"
+const API_URL = "https://8jspl2f4c3.execute-api.us-east-2.amazonaws.com/"
 
 function PizzaPage() {
   const [pizzas, setPizzas] = useState([]);
