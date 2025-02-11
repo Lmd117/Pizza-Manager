@@ -8,13 +8,14 @@ const schema = a.schema({
     .model({
       name: a.string().required(),
       createdAt: a.string(),
-      toppings: a.hasMany("pizzas", "toppings"), // Store topping IDs
+      toppings: a.hasMany("toppings", "pizzaId"), // Store topping IDs
     }).authorization((allow) => allow.guest()), // Anyone can modify this table
 
   toppings: a
     .model({
       name: a.string().required(),
-      pizzas: a.belongsTo("pizzas", "toppings"),
+      pizzaId: a.string().required(), // Reference field for the relationship
+      pizza: a.belongsTo("pizzas", "pizzaId"), // relationship definition
     }).authorization((allow) => allow.guest()),
 });
 
