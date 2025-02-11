@@ -9,13 +9,13 @@ const schema = a.schema({
       name: a.string().required(),
       createdAt: a.string(),
       toppings: a.hasMany("pizzas", "toppings"), // Store topping IDs
-    }),
+    }).authorization((allow) => allow.guest()), // Anyone can modify this table
 
   toppings: a
     .model({
       name: a.string().required(),
       pizzas: a.belongsTo("pizzas", "toppings"),
-    }),
+    }).authorization((allow) => allow.guest()),
 });
 
 export type Schema = ClientSchema<typeof schema>;
