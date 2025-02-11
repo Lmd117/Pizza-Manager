@@ -1,11 +1,12 @@
-import { useState, useEffect } from 'react'
-import { Route, Routes, Link, BrowserRouter} from "react-router-dom"
+import { Route, Routes, Link, BrowserRouter} from "react-router-dom";
 import {
   View,
   Heading,
 } from "@aws-amplify/ui-react";
+
 import "@aws-amplify/ui-react/styles.css";
-import './App.css'
+import './App.css';
+
 import PizzaPage from './PizzaPage';
 import ToppingsPage from './ToppingsPage';
 import Header from './Header';

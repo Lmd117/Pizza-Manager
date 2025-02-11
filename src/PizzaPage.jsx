@@ -5,9 +5,10 @@ import { Button, Flex,
         TableRow, TableBody, 
         View, Heading, 
         Alert, Badge } from "@aws-amplify/ui-react";
+
 import "@aws-amplify/ui-react/styles.css";
 
-const API_URL = "https://gjk8ovhrl2.execute-api.us-east-2.amazonaws.com/Dev"
+const API_URL = "https://p304ldk4e6.execute-api.us-east-2.amazonaws.com/main"
 
 function PizzaPage() {
   const [pizzas, setPizzas] = useState([]);
