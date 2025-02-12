@@ -37,7 +37,7 @@ function ToppingsPage() {
           return;
         }
     
-        setToppings(data);
+        setToppings(data.items || []);
       } catch (error) {
         console.error("Error fetching toppings:", error);
         setToppings([]);
@@ -60,7 +60,7 @@ function ToppingsPage() {
     }
 
     const requestBody = { name: newTopping.trim() };
-    console.log("🔹 Sending POST Request:", requestBody);
+    console.log("Sending POST Request:", requestBody);
 
     try {
         const response = await fetch(`${API_URL}/toppings`, {
