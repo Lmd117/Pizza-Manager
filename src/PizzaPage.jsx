@@ -154,7 +154,7 @@ function PizzaPage() {
       const response = await fetch(`${API_URL}/pizzas`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ pizzaId: editingPizza.pizzaId, name: newPizzaName, toppings: selectedToppings }),
+        body: JSON.stringify({ id: editingPizza.id, name: newPizzaName, toppings: selectedToppings }),
       });
 
       if (!response.ok) {
@@ -280,7 +280,7 @@ function PizzaPage() {
                         onClick={() => {
                           setEditingPizza({ id: pizza.id, name: pizza.name});
                           setNewPizzaName(pizza.name);
-                          setSelectedToppings(pizza.toppings);
+                          setSelectedToppings([...pizza.toppings]);
                         }}
                     >
                         Edit
