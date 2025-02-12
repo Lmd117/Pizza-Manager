@@ -25,37 +25,66 @@ function PizzaPage() {
   // fetch pizzas from DB
   const fetchPizzas = async() => {
     try {
-      const response = await fetch(`${API_URL}/pizzas`);
+      const response = await fetch(`${API_URL}/pizzas`, {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      });
+
       const data = await response.json();
-      setPizzas(data);
+
+      if (!data.items || !Array.isArray(data.items)) {
+        console.error("API returned invalid data:", data);
+        setPizzas([]);
+        return;
+      }
+
+      setPizzas(data.items || []);
+
     } catch (error) {
       console.error("Error fetching pizzas:", error);
+      setPizzas([]);
       setErrorMessage("Failed to fetch pizzas.");
     }
   }
 
   // Fetch toppings from DB
-  const fetchToppings = async() => {
+  const fetchToppings = async () => {
     try {
-      const response = await fetch(`${API_URL}/toppings`)
+      const response = await fetch(`${API_URL}/toppings`, {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      });
+
       const data = await response.json();
-      setToppings(data);
+      console.log("API Response:", data);
+
+      if (!data.items || !Array.isArray(data.items)) {
+        console.error("API returned invalid data:", data);
+        setToppings([]);
+        return;
+      }
+  
+      setToppings(data.items || []);
     } catch (error) {
-      console.error('Error Fetching Toppings:', error)
-      setErrorMessage("Failed to fetch the toppings.")
+      console.error("Error fetching toppings:", error);
+      setToppings([]);
+      setErrorMessage("Failed to fetch toppings.");
     }
-  }
+  };
 
   // Add a new pizza
   const addPizza = async() => {
+
     if (!newPizzaName.trim()) {
       setErrorMessage("Pizza name cannot be empty!");
       return;
     }
-    if (pizzas.some((pizza) => pizza.name.toLowerCase() === newPizzaName.trim().toLowerCase())) {
+
+    if (pizzas.includes(newPizzaName.trim())) {
       setErrorMessage("Duplicate pizzas are not allowed!");
       return;
     }
+
     if (selectedToppings.length === 0) {
       setErrorMessage("A pizza must have at least one topping!");
       return;
@@ -68,7 +97,11 @@ function PizzaPage() {
         body: JSON.stringify({ name: newPizzaName, toppings: selectedToppings }),
       });
 
-      if (!response.ok) throw new Error("Failed to add pizza");
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("API Error Response:", errorText)
+        throw new Error("Failed to add pizza");
+      }
       
       fetchPizzas();
       resetForm();
@@ -79,12 +112,12 @@ function PizzaPage() {
   };
 
   // Delete a pizza
-  const deletePizza = async (pizzaId) => {
+  const deletePizza = async (id) => {
     try {
       const response = await fetch(`${API_URL}/pizzas`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ pizzaId }),
+        body: JSON.stringify({ id }),
       });
 
       if (!response.ok) throw new Error("Failed to delete pizza");
@@ -98,17 +131,20 @@ function PizzaPage() {
 
   // Update an existing pizza
   const updatePizza = async() => {
+
     if (!newPizzaName.trim()) {
       setErrorMessage("Pizza name cannot be empty!");
       return;
     }
+
     if (
-      pizzas.some((pizza) => pizza.name.toLowerCase() === newPizzaName.trim().toLowerCase()) &&
+      pizzas.includes(newPizzaName.trim()) &&
       newPizzaName !== editingPizza.name
     ) {
       setErrorMessage("Duplicate pizzas are not allowed!");
       return;
     }
+
     if (selectedToppings.length === 0) {
       setErrorMessage("A pizza must have at least one topping!");
       return;
@@ -121,9 +157,14 @@ function PizzaPage() {
         body: JSON.stringify({ pizzaId: editingPizza.pizzaId, name: newPizzaName, toppings: selectedToppings }),
       });
 
-      if (!response.ok) throw new Error("Failed to update pizza");
+      if (!response.ok) {
+        const errorText = await response.text(); 
+        console.error("API Error Response:", errorText);
+        throw new Error(`Failed to update pizza: ${errorText}`);
+      }
       
       fetchPizzas();
+      setEditingPizza(null);
       resetForm();
     } catch (error) {
       console.error("Error updating pizza:", error);
@@ -237,9 +278,9 @@ function PizzaPage() {
                         backgroundColor="#ffcc00"
                         color="black"
                         onClick={() => {
-                        setEditingPizza(pizza);
-                        setNewPizzaName(pizza.name);
-                        setSelectedToppings(pizza.toppings);
+                          setEditingPizza({ id: pizza.id, name: pizza.name});
+                          setNewPizzaName(pizza.name);
+                          setSelectedToppings(pizza.toppings);
                         }}
                     >
                         Edit

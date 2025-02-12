@@ -58,14 +58,14 @@ function ToppingsPage() {
       return;
     }
 
-    const requestBody = { name: newTopping.trim() };
-    console.log("Sending POST Request:", requestBody);
+    //const requestBody = { name: newTopping.trim() };
+    //console.log("Sending POST Request:", requestBody);
 
     try {
         const response = await fetch(`${API_URL}/toppings`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(requestBody),
+          body: JSON.stringify({ name: newTopping.trim() }),
         });
   
         if (!response.ok) {
@@ -112,13 +112,6 @@ function ToppingsPage() {
     }
     if (toppings.includes(newTopping.trim())) {
       setErrorMessage("Duplicate toppings are not allowed!");
-      return;
-    }
-
-    console.log("Editing Topping:", editingTopping);
-    console.log("Sending PUT Request:", JSON.stringify({ id: editingTopping?.id, name: newTopping }));
-    if (!editingTopping?.id) {
-      console.error("Error: Missing Topping ID in updateTopping()");
       return;
     }
 
