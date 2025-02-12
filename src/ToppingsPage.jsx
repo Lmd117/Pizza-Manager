@@ -11,6 +11,7 @@ import "@aws-amplify/ui-react/styles.css";
 const API_URL = "https://p304ldk4e6.execute-api.us-east-2.amazonaws.com/main";
 
 function ToppingsPage() {
+
     const [toppings, setToppings] = useState([]);
     const [newTopping, setNewTopping] = useState("");
     const [editingTopping, setEditingTopping] = useState(null);
@@ -29,7 +30,6 @@ function ToppingsPage() {
         });
 
         const data = await response.json();
-        console.log("API Response:", data);
 
         if (!data.items || !Array.isArray(data.items)) {
           console.error("API returned invalid data:", data);
@@ -58,9 +58,6 @@ function ToppingsPage() {
       return;
     }
 
-    //const requestBody = { name: newTopping.trim() };
-    //console.log("Sending POST Request:", requestBody);
-
     try {
         const response = await fetch(`${API_URL}/toppings`, {
           method: "POST",
@@ -68,14 +65,7 @@ function ToppingsPage() {
           body: JSON.stringify({ name: newTopping.trim() }),
         });
   
-        if (!response.ok) {
-          const errorText = await response.text();
-          console.error("API Error Response:", errorText)
-          throw new Error("Failed to add topping");
-        }
-
-        const data = await response.json();
-        console.log("Topping Added:", data);
+        checkResponseError(response);
   
         fetchToppings();
         setNewTopping("");
@@ -95,7 +85,7 @@ function ToppingsPage() {
           body: JSON.stringify({ id }),
         });
   
-        if (!response.ok) throw new Error("Failed to delete topping");
+        checkResponseError(response);
   
         fetchToppings();
       } catch (error) {
@@ -110,6 +100,7 @@ function ToppingsPage() {
       setErrorMessage("Topping name cannot be empty!");
       return;
     }
+
     if (toppings.includes(newTopping.trim())) {
       setErrorMessage("Duplicate toppings are not allowed!");
       return;
@@ -121,12 +112,8 @@ function ToppingsPage() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ id: editingTopping.id, name: newTopping }),
         });
-  
-        if (!response.ok) {
-          const errorText = await response.text(); 
-          console.error("API Error Response:", errorText);
-          throw new Error(`Failed to update topping: ${errorText}`);
-        }
+
+        checkResponseError(response);
       
         fetchToppings();
         setEditingTopping(null);
@@ -138,44 +125,53 @@ function ToppingsPage() {
       }
   };
 
+  // Error check to make sure that the API returned correct response
+  const checkResponseError = async (response) => {
+    if (!response.ok) {
+      const errorText = await response.text(); 
+      console.error("API Error Response:", errorText);
+      throw new Error(`Failed topping: ${errorText}`);
+    }
+  };
+
     return (
         <View
-            padding="2rem"
-            maxWidth="600px"
-            margin="auto"
-            backgroundColor="darkgray"
-            borderRadius="10px"
+          padding="2rem"
+          maxWidth="600px"
+          margin="auto"
+          backgroundColor="darkgray"
+          borderRadius="10px"
         >
-            <Heading level={2} textAlign="center" color="white">
-            Manage Pizza Toppings
-            </Heading>
+          <Heading level={2} textAlign="center" color="white">
+          Manage Pizza Toppings
+          </Heading>
 
-            {errorMessage && (
-            <Alert variation="error" marginBottom="1rem">
-                {errorMessage}
-            </Alert>
-            )}
+          {errorMessage && (
+          <Alert variation="error" marginBottom="1rem">
+              {errorMessage}
+          </Alert>
+          )}
 
-            <Flex direction="column" gap="1rem">
-            <Input
-                placeholder="Enter a topping"
-                value={newTopping}
-                onChange={(e) => setNewTopping(e.target.value)}
-                backgroundColor="white"
-                color="black"
-            />
-            {editingTopping ? (
-                <Button variation="primary" backgroundColor="#ff6600" color="white" onClick={updateTopping}>
-                Update Topping
-                </Button>
-            ) : (
-                <Button variation="primary" backgroundColor="#0073e6" color="white" onClick={addTopping}>
-                Add Topping
-                </Button>
-            )}
-            </Flex>
+          <Flex direction="column" gap="1rem">
+          <Input
+              placeholder="Enter a topping"
+              value={newTopping}
+              onChange={(e) => setNewTopping(e.target.value)}
+              backgroundColor="white"
+              color="black"
+          />
+          {editingTopping ? (
+              <Button variation="primary" backgroundColor="#ff6600" color="white" onClick={updateTopping}>
+              Update Topping
+              </Button>
+          ) : (
+              <Button variation="primary" backgroundColor="#0073e6" color="white" onClick={addTopping}>
+              Add Topping
+              </Button>
+          )}
+          </Flex>
 
-            <Table variation="striped" marginTop="2rem" backgroundColor="white">
+          <Table variation="striped" marginTop="2rem" backgroundColor="white">
             <TableHead>
                 <TableRow>
                 <TableCell as="th" backgroundColor="#333" color="white">
@@ -187,7 +183,7 @@ function ToppingsPage() {
                 </TableRow>
             </TableHead>
             <TableBody>
-                {toppings.map((topping) => (
+              {toppings.map((topping) => (
                 <TableRow key={topping.toppingId} backgroundColor="#f9f9f9">
                     <TableCell>{topping.name}</TableCell>
                     <TableCell>
@@ -215,9 +211,9 @@ function ToppingsPage() {
                         </Flex>
                     </TableCell>
                 </TableRow>
-                ))}
+              ))}
             </TableBody>
-            </Table>
+          </Table>
         </View>
     );
 }
