@@ -33,11 +33,11 @@ function PizzaPage() {
       const data = await response.json();
       console.log("🍕 API Response for Pizzas:", JSON.stringify(data, null, 2));
 
-      // if (!data.items || !Array.isArray(data.items)) {
-      //   console.error("API returned invalid data:", data);
-      //   setPizzas([]);
-      //   return;
-      // }
+      if (!data.items || !Array.isArray(data.items)) {
+        console.error("API returned invalid data:", data);
+        setPizzas([]);
+        return;
+      }
 
       setPizzas(data.items);
 
@@ -120,7 +120,7 @@ function PizzaPage() {
     }
 
     try {
-      console.log(`🗑️ Deleting Pizza: ${id}`);
+      console.log(`Deleting Pizza: ${id}`);
       const response = await fetch(`${API_URL}/pizzas`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
@@ -277,7 +277,7 @@ function PizzaPage() {
                   <TableCell>
                       <Flex gap="0.5rem">
                       {pizza.toppings.map((topping) => (
-                          <Badge key={topping.id} variation="success">
+                          <Badge key={topping} variation="success">
                             {topping.name}
                           </Badge>
                       ))}
@@ -293,12 +293,12 @@ function PizzaPage() {
                           onClick={() => {
                             setEditingPizza({ id: pizza.id, name: pizza.name});
                             setNewPizzaName(pizza.name);
-                            setSelectedToppings(pizza.toppings);
+                            setSelectedToppings(pizza.toppings.map(t => t.name));
                           }}
                       >
                           Edit
                       </Button>
-                      <Button variation="destructive" size="small" backgroundColor="#cc0000" color="white" onClick={() => deletePizza(pizza.name)}>
+                      <Button variation="destructive" size="small" backgroundColor="#cc0000" color="white" onClick={() => deletePizza(pizza.id)}>
                           Delete
                       </Button>
                       </Flex>
