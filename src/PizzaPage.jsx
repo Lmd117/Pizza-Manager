@@ -31,14 +31,15 @@ function PizzaPage() {
       });
 
       const data = await response.json();
+      console.log("🍕 API Response for Pizzas:", JSON.stringify(data, null, 2));
 
-      if (!data.items || !Array.isArray(data.items)) {
-        console.error("API returned invalid data:", data);
-        setPizzas([]);
-        return;
-      }
+      // if (!data.items || !Array.isArray(data.items)) {
+      //   console.error("API returned invalid data:", data);
+      //   setPizzas([]);
+      //   return;
+      // }
 
-      setPizzas(data.items || []);
+      setPizzas(data.items);
 
     } catch (error) {
       console.error("Error fetching pizzas:", error);
@@ -64,7 +65,7 @@ function PizzaPage() {
         return;
       }
   
-      setToppings(data.items || []);
+      setToppings(data.items);
     } catch (error) {
       console.error("Error fetching toppings:", error);
       setToppings([]);
@@ -113,21 +114,33 @@ function PizzaPage() {
 
   // Delete a pizza
   const deletePizza = async (id) => {
+    if (!id) {
+      console.error("Invalid Pizza ID:", id);
+      return;
+    }
+
     try {
+      console.log(`🗑️ Deleting Pizza: ${id}`);
       const response = await fetch(`${API_URL}/pizzas`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id }),
       });
 
-      if (!response.ok) throw new Error("Failed to delete pizza");
-      
-      fetchPizzas();
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("API Error Response:", errorText);
+        throw new Error("Failed to delete pizza");
+      }
+
+      console.log("Pizza Deleted Successfully");
+      fetchPizzas(); 
     } catch (error) {
-      console.error("Error deleting pizza:", error);
-      setErrorMessage("Error deleting pizza.");
+        console.error("Error deleting pizza:", error);
+        setErrorMessage("Error deleting pizza.");
     }
-  };
+};
+
 
   // Update an existing pizza
   const updatePizza = async() => {
@@ -258,40 +271,40 @@ function PizzaPage() {
             </TableRow>
             </TableHead>
             <TableBody>
-            {pizzas.map((pizza) => (
+              {pizzas.map((pizza) => (
                 <TableRow key={pizza.name} backgroundColor="#f9f9f9">
-                <TableCell>{pizza.name}</TableCell>
-                <TableCell>
-                    <Flex gap="0.5rem">
-                    {pizza.toppings.map((topping) => (
-                        <Badge key={topping.id} variation="success">
-                          {topping.name}
-                        </Badge>
-                    ))}
-                    </Flex>
-                </TableCell>
-                <TableCell>
-                    <Flex gap="0.5rem">
-                    <Button
-                        variation="warning"
-                        size="small"
-                        backgroundColor="#ffcc00"
-                        color="black"
-                        onClick={() => {
-                          setEditingPizza({ id: pizza.id, name: pizza.name});
-                          setNewPizzaName(pizza.name);
-                          setSelectedToppings([pizza.toppings]);
-                        }}
-                    >
-                        Edit
-                    </Button>
-                    <Button variation="destructive" size="small" backgroundColor="#cc0000" color="white" onClick={() => deletePizza(pizza.name)}>
-                        Delete
-                    </Button>
-                    </Flex>
-                </TableCell>
+                  <TableCell>{pizza.name}</TableCell>
+                  <TableCell>
+                      <Flex gap="0.5rem">
+                      {pizza.toppings.map((topping) => (
+                          <Badge key={topping.id} variation="success">
+                            {topping.name}
+                          </Badge>
+                      ))}
+                      </Flex>
+                  </TableCell>
+                  <TableCell>
+                      <Flex gap="0.5rem">
+                      <Button
+                          variation="warning"
+                          size="small"
+                          backgroundColor="#ffcc00"
+                          color="black"
+                          onClick={() => {
+                            setEditingPizza({ id: pizza.id, name: pizza.name});
+                            setNewPizzaName(pizza.name);
+                            setSelectedToppings(pizza.toppings);
+                          }}
+                      >
+                          Edit
+                      </Button>
+                      <Button variation="destructive" size="small" backgroundColor="#cc0000" color="white" onClick={() => deletePizza(pizza.name)}>
+                          Delete
+                      </Button>
+                      </Flex>
+                  </TableCell>
                 </TableRow>
-            ))}
+              ))}
             </TableBody>
         </Table>
         </View>
