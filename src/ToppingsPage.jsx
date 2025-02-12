@@ -87,12 +87,12 @@ function ToppingsPage() {
   };
 
   // Delete a topping
-  const deleteTopping = async (toppingId) => {
+  const deleteTopping = async (id) => {
     try {
         const response = await fetch(`${API_URL}/toppings`, {
           method: "DELETE",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ toppingId }),
+          body: JSON.stringify({ id }),
         });
   
         if (!response.ok) throw new Error("Failed to delete topping");
@@ -216,7 +216,7 @@ function ToppingsPage() {
                                 size="small" 
                                 backgroundColor="#cc0000" 
                                 color="white" 
-                                onClick={() => deleteTopping(topping.toppingId)}>
+                                onClick={() => deleteTopping(topping.id)}>
                                 Delete
                             </Button>
                         </Flex>
