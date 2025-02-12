@@ -69,7 +69,14 @@ function ToppingsPage() {
           body: JSON.stringify(requestBody),
         });
   
-        if (!response.ok) throw new Error("Failed to add topping");
+        if (!response.ok) {
+          const errorText = await requestBody.text();
+          console.error("API Error Response:", errorText)
+          throw new Error("Failed to add topping");
+        }
+
+        const data = await response.json();
+        console.log("Topping Added:", data);
   
         fetchToppings();
         setNewTopping("");
