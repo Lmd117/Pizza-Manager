@@ -192,7 +192,7 @@ function PizzaPage() {
           padding="2rem"
           maxWidth="700px"
           margin="auto"
-          backgroundColor="darkgray" // Ensures proper contrast
+          backgroundColor="darkgray"
           borderRadius="10px"
         >
         <Heading level={2} margin={"1rem"} textAlign="center" color="white">
@@ -227,7 +227,7 @@ function PizzaPage() {
                   color="white"
                   onClick={() => toggleTopping(topping)}
                 >
-                  {topping}
+                  {topping.name}
                 </Button>
               ))}
             </Flex>
@@ -264,8 +264,8 @@ function PizzaPage() {
                 <TableCell>
                     <Flex gap="0.5rem">
                     {pizza.toppings.map((topping) => (
-                        <Badge key={topping} variation="success">
-                        {topping}
+                        <Badge key={topping.id} variation="success">
+                        {topping.name}
                         </Badge>
                     ))}
                     </Flex>
