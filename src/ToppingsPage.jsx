@@ -47,7 +47,6 @@ function ToppingsPage() {
 
   // Add a new topping
   const addTopping = async() => {
-    print("Received request to add topping:", json.dumps(data, indent=2))
 
     if (!newTopping.trim()) {
       setErrorMessage("Topping name cannot be empty!");
@@ -70,7 +69,7 @@ function ToppingsPage() {
         });
   
         if (!response.ok) {
-          const errorText = await requestBody.text();
+          const errorText = await response.text();
           console.error("API Error Response:", errorText)
           throw new Error("Failed to add topping");
         }
