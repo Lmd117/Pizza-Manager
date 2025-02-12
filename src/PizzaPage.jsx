@@ -183,7 +183,7 @@ function PizzaPage() {
   // Handle topping selection
   const toggleTopping = (topping) => {
     setSelectedToppings((prev) =>
-      prev.includes(topping.name) ? prev.filter((t) => t !== topping.name) : [...prev, topping.name]
+      prev.includes(topping) ? prev.filter((t) => t !== topping) : [...prev, topping]
     );
   };
 
