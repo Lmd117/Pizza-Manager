@@ -220,12 +220,12 @@ function PizzaPage() {
             <Flex wrap="wrap" gap="0.5rem">
               {toppings.map((topping) => (
                 <Button
-                  key={topping}
-                  variation={selectedToppings.includes(topping) ? "primary" : "secondary"}
+                  key={topping.id}
+                  variation={selectedToppings.includes(topping.name) ? "primary" : "secondary"}
                   size="small"
-                  backgroundColor={selectedToppings.includes(topping) ? "#ff6600" : "#555"}
+                  backgroundColor={selectedToppings.includes(topping.name) ? "#ff6600" : "#555"}
                   color="white"
-                  onClick={() => toggleTopping(topping)}
+                  onClick={() => toggleTopping(topping.name)}
                 >
                   {topping.name}
                 </Button>
@@ -265,7 +265,7 @@ function PizzaPage() {
                     <Flex gap="0.5rem">
                     {pizza.toppings.map((topping) => (
                         <Badge key={topping.id} variation="success">
-                        {topping.name}
+                          {topping.name}
                         </Badge>
                     ))}
                     </Flex>
@@ -280,7 +280,7 @@ function PizzaPage() {
                         onClick={() => {
                           setEditingPizza({ id: pizza.id, name: pizza.name});
                           setNewPizzaName(pizza.name);
-                          setSelectedToppings([...pizza.toppings]);
+                          setSelectedToppings([pizza.toppings]);
                         }}
                     >
                         Edit
