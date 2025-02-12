@@ -116,13 +116,13 @@ function ToppingsPage() {
     }
 
     console.log("Editing Topping:", editingTopping);
-    console.log("Sending PUT Request:", JSON.stringify({ toppingId: editingTopping?.toppingId, name: newTopping }));
+    console.log("Sending PUT Request:", JSON.stringify({ id: editingTopping?.id, name: newTopping }));
 
     try {
         const response = await fetch(`${API_URL}/toppings`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ toppingId: editingTopping.toppingId, name: newTopping }),
+          body: JSON.stringify({ id: editingTopping.id, name: newTopping }),
         });
   
         if (!response.ok) {
