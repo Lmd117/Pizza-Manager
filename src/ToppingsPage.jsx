@@ -117,6 +117,10 @@ function ToppingsPage() {
 
     console.log("Editing Topping:", editingTopping);
     console.log("Sending PUT Request:", JSON.stringify({ id: editingTopping?.id, name: newTopping }));
+    if (!editingTopping?.id) {
+      console.error("Error: Missing Topping ID in updateTopping()");
+      return;
+    }
 
     try {
         const response = await fetch(`${API_URL}/toppings`, {
@@ -201,7 +205,7 @@ function ToppingsPage() {
                             backgroundColor="#ffcc00"
                             color="black"
                             onClick={() => {
-                                setEditingTopping({ toppingId: topping.toppingId, name: topping.name });
+                                setEditingTopping({ id: topping.id, name: topping.name });
                                 setNewTopping(topping.name);
                             }}
                             >
