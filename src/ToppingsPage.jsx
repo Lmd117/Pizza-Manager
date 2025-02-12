@@ -114,6 +114,10 @@ function ToppingsPage() {
       setErrorMessage("Duplicate toppings are not allowed!");
       return;
     }
+
+    console.log("Editing Topping:", editingTopping);
+    console.log("Sending PUT Request:", JSON.stringify({ toppingId: editingTopping?.toppingId, name: newTopping }));
+
     try {
         const response = await fetch(`${API_URL}/toppings`, {
           method: "PUT",
@@ -121,8 +125,12 @@ function ToppingsPage() {
           body: JSON.stringify({ toppingId: editingTopping.toppingId, name: newTopping }),
         });
   
-        if (!response.ok) throw new Error("Failed to update topping");
-  
+        if (!response.ok) {
+          const errorText = await response.text(); 
+          console.error("API Error Response:", errorText);
+          throw new Error(`Failed to update topping: ${errorText}`);
+        }
+      
         fetchToppings();
         setEditingTopping(null);
         setNewTopping("");
@@ -138,7 +146,7 @@ function ToppingsPage() {
             padding="2rem"
             maxWidth="600px"
             margin="auto"
-            backgroundColor="darkgray" // Matches Pizza Page
+            backgroundColor="darkgray"
             borderRadius="10px"
         >
             <Heading level={2} textAlign="center" color="white">
@@ -193,11 +201,11 @@ function ToppingsPage() {
                             backgroundColor="#ffcc00"
                             color="black"
                             onClick={() => {
-                                setEditingTopping(topping);
+                                setEditingTopping({ toppingId: topping.toppingId, name: topping.name });
                                 setNewTopping(topping.name);
                             }}
                             >
-                            Edit
+                              Edit
                             </Button>
                             <Button 
                                 variation="destructive" 
